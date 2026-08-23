@@ -454,7 +454,7 @@ CATEGORY_MAPPING = {
     'metal': 'Metal',
     'paper': 'Paper',
     'plastic': 'Plastics',  # Note the plural form in directory
-    'shoes': 'Shooes',      # Match actual directory name with typo
+    'shoes': 'Shoes',
     'trash': 'Trash'
 }
 

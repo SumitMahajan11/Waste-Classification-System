@@ -23,7 +23,7 @@ This system uses trained CNN models to classify waste images into 9 categories a
 
 ## Model Performance
 
-Four CNN architectures were trained and evaluated on the 9-category waste dataset (1,945 images). Empirical validation accuracy extracted directly from saved PyTorch checkpoints:
+Four CNN architectures were trained and evaluated on the 9-category waste dataset (1,945 images). Best result: 91.79% validation accuracy (190/207, EfficientNet-B0, best of 4 models tested — see runs/classifiers/efficientnet_b0_best.pth). Empirical validation accuracy extracted directly from saved PyTorch checkpoints:
 
 | Model          | Val. Accuracy | Epoch | Val. Loss | Checkpoint File |
 |----------------|---------------|-------|-----------|-----------------|
@@ -66,7 +66,7 @@ The models were trained on a dataset containing 1,945 waste images across 9 cate
 - Metal: 212 images
 - Paper: 221 images
 - Plastics: 187 images
-- Shooes: 221 images
+- Shoes: 221 images
 - Trash: 204 images
 
 ## API Endpoints
