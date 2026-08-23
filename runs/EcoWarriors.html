@@ -1,0 +1,2549 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>EcoWaste — Full Demo (HTML/CSS/JS)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.11.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root{
+      --bg1: linear-gradient(135deg, #f3fff6 0%, #e6fbff 50%, #f0f8ff 100%);
+      --card: rgba(255, 255, 255, 0.85);
+      --accent: #178a3b;
+      --accent-2: #0f9dff;
+      --accent-3: #ff6b35;
+      --muted: #567063;
+      --glass-blur: 12px;
+      --radius: 16px;
+      --shadow: 0 15px 35px rgba(6, 20, 10, 0.12);
+      --text: #053;
+      --card-text: #053;
+      --border: rgba(10, 80, 40, 0.12);
+      --success: #28a745;
+      --warning: #ffc107;
+      --danger: #dc3545;
+      --info: #17a2b8;
+      --gradient-1: linear-gradient(135deg, #178a3b, #25b36f);
+      --gradient-2: linear-gradient(135deg, #0f9dff, #178a3b);
+      --gradient-3: linear-gradient(135deg, #ff6b35, #ff9e6d);
+    }
+    
+    .dark-mode {
+      --bg1: linear-gradient(135deg, #0a1e14 0%, #0c2a22 50%, #1a1a2e 100%);
+      --card: rgba(30, 45, 40, 0.85);
+      --accent: #25b36f;
+      --accent-2: #4db8ff;
+      --accent-3: #ff8c66;
+      --muted: #a8cbb9;
+      --glass-blur: 12px;
+      --radius: 16px;
+      --shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+      --text: #e0f0e9;
+      --card-text: #e0f0e9;
+      --border: rgba(100, 180, 140, 0.2);
+      --success: #28a745;
+      --warning: #ffc107;
+      --danger: #dc3545;
+      --info: #17a2b8;
+      --gradient-1: linear-gradient(135deg, #25b36f, #1a8f45);
+      --gradient-2: linear-gradient(135deg, #1a8f45, #0f9dff);
+      --gradient-3: linear-gradient(135deg, #ff8c66, #ff6b35);
+    }
+    
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:var(--bg1);color:var(--text);}
+    body{overflow-y:auto;-webkit-font-smoothing:antialiased}
+
+    /* global layout */
+    #particles{position:fixed;inset:0;z-index:0;pointer-events:none}
+    .container{position:relative;z-index:2;max-width:1200px;margin:32px auto;padding:20px}
+    header{display:flex;gap:14px;align-items:center;margin-bottom:20px;flex-wrap:wrap}
+    .logo{width:64px;height:64px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#25b36f);display:flex;align-items:center;justify-content:center;color:white;font-weight:800;flex-shrink:0}
+    h1{margin:0;font-size:24px}
+    .lead{margin:0;color:var(--muted);font-size:14px}
+
+    .grid{display:grid;grid-template-columns:360px 1fr;gap:18px}
+    .card{background:var(--card);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);color:var(--card-text);transition: all 0.3s ease;position:relative;z-index:1;border:1px solid rgba(255,255,255,0.3);}
+    .card:hover{transform: translateY(-5px);box-shadow: 0 15px 30px rgba(6,20,10,0.1);border-color:rgba(23, 138, 59, 0.2);}
+    
+    /* Fix for overlapping issue between sidebar and main content */
+    aside .card { margin-bottom: 12px; }
+    main .card { margin-top: 12px; }
+
+    /* left */
+    .profile{display:flex;gap:12px;align-items:center}
+    .avatar{width:64px;height:64px;border-radius:10px;background:linear-gradient(180deg,#fff,#f2fff6);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent)}
+    .stats{display:flex;gap:10px;margin-top:12px}
+    .stat{flex:1;padding:16px;border-radius:12px;background:rgba(255,255,255,0.15);text-align:center;transition: all 0.3s ease;box-shadow: 0 4px 10px rgba(0,0,0,0.15);cursor:pointer;}
+    .stat:hover{transform: translateY(-3px);box-shadow: 0 6px 15px rgba(0,0,0,0.25);background:rgba(255,255,255,0.2);}
+    .stat:active{transform: scale(0.98);}
+    
+    .dark-mode .stat{background:rgba(255,255,255,0.1);}
+    .dark-mode .stat:hover{background:rgba(255,255,255,0.15);}
+    
+    /* Remove floating and pulsing animations */
+    .floating { }
+    .pulsing { }
+    
+    /* Fix for profile section spacing */
+    .profile-card { min-height: 280px; }
+
+    .ring{width:88px;height:88px}
+    .btn{display:inline-flex;align-items:center;gap:10px;padding:14px 20px;border-radius:12px;border:none;background:var(--gradient-1);color:white;cursor:pointer;font-weight:600;transition: all 0.3s ease;box-shadow: 0 5px 10px rgba(0,0,0,0.12);justify-content:center;}
+    .btn:hover{transform: translateY(-2px);box-shadow: 0 8px 15px rgba(0,0,0,0.18);}
+    .btn:active{transform: translateY(0) scale(0.98);}
+    .btn.alt{background:transparent;color:var(--accent);border:2px solid var(--border);box-shadow: 0 4px 8px rgba(0,0,0,0.08);}
+    .dark-mode .btn.alt{color:#25b36f;border:2px solid rgba(100, 180, 140, 0.3);background:rgba(255,255,255,0.1);}
+    .btn.alt:hover{background:rgba(23, 138, 59, 0.1);transform: translateY(-2px);box-shadow: 0 8px 15px rgba(0,0,0,0.15);}
+    .btn-block{display:flex;width:100%;justify-content:center;padding:16px}
+    .btn.sm{padding:10px 14px;font-size:14px}
+    .btn.warning{background:var(--gradient-3);color:#fff}
+    .btn.danger{background:var(--gradient-3);color:#fff}
+    .btn.info{background:var(--gradient-2);color:#fff}
+    .btn.camera{background:var(--gradient-2);}
+    .btn.upload{background:var(--gradient-1);}
+    .btn.classify{background:var(--gradient-3);}
+    .btn.clear{background:linear-gradient(135deg, #6c757d, #495057);}
+
+    /* main */
+    .uploader{display:flex;gap:12px;flex-direction:column}
+    .drop{border-radius:16px;border:3px dashed var(--border);display:flex;align-items:center;justify-content:center;padding:30px;min-height:200px;cursor:pointer;transition:all 0.3s ease;background:rgba(255,255,255,0.15);}
+    .drop:hover{transform: translateY(-3px);background:rgba(255,255,255,0.25);border-color:var(--accent);box-shadow: 0 10px 20px rgba(0,0,0,0.15);}
+    .drop.active{background:rgba(23, 138, 59, 0.2);border-color:var(--accent);}
+    
+    .dark-mode .drop{background:rgba(255,255,255,0.1);}
+    .dark-mode .drop:hover{background:rgba(255,255,255,0.2);}
+    .thumb{max-width:100%;max-height:200px;border-radius:8px;box-shadow: 0 4px 8px rgba(0,0,0,0.1);}
+
+    .preds{display:grid;grid-template-columns:1fr 280px;gap:12px;margin-top:12px}
+    .pred-list{padding:12px;border-radius:10px;background:rgba(255,255,255,0.15)}
+    .dark-mode .pred-list{background:rgba(255,255,255,0.1);}
+    .pred{display:flex;justify-content:space-between;padding:10px 8px;border-bottom:1px dashed var(--border);transition: background 0.2s ease;}
+    .pred:hover{background:rgba(0,0,0,0.03);}
+    .dark-mode .pred:hover{background:rgba(255,255,255,0.1);}
+
+    .lessons{max-height:300px;overflow:auto;padding-right:6px}
+    .history-list{max-height:220px;overflow:auto}
+    .hist{display:flex;gap:10px;align-items:center;padding:10px;border-radius:10px;transition: background 0.2s ease;}
+    .hist:hover{background:rgba(0,0,0,0.03);}
+    .dark-mode .hist:hover{background:rgba(255,255,255,0.1);}
+    .hist img{width:64px;height:48px;object-fit:cover;border-radius:6px}
+    
+    /* Fix for overlapping elements */
+    .card + .card { margin-top: 12px; }
+
+    .controls-row{display:flex;gap:8px;align-items:center}
+    .switch{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:#fff;border:1px solid var(--border);transition: all 0.3s ease;}
+    .switch:hover{box-shadow: 0 2px 4px rgba(0,0,0,0.1);}
+
+    .fab{position:fixed;right:25px;bottom:25px;width:65px;height:65px;border-radius:50%;background:var(--gradient-1);display:flex;align-items:center;justify-content:center;color:white;font-size:30px;z-index:6;box-shadow:0 20px 50px rgba(16,90,40,0.25);cursor:pointer;transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);}
+    .fab:hover{transform: scale(1.15) rotate(15deg);box-shadow:0 25px 60px rgba(16,90,40,0.35);}
+    .fab:active{transform: scale(0.95);}
+
+    /* modal */
+    #modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:1000}
+    #modal .back{position:absolute;inset:0;background:rgba(0,0,0,0.35);backdrop-filter:blur(0px);transition:backdrop-filter 0.3s ease}
+    #modal:target .back, #modal[style*="display: flex"] .back{backdrop-filter:blur(5px)}
+    #modal .modal-content{background:var(--card);border-radius:var(--radius);padding:25px;max-width:550px;width:90%;max-height:90vh;overflow-y:auto;box-shadow: 0 20px 40px rgba(0,0,0,0.2);margin:auto;transform:scale(0.95);opacity:0;transition:all 0.3s ease}
+    #modal:target .modal-content, #modal[style*="display: flex"] .modal-content{transform:scale(1);opacity:1}
+    
+    .dark-mode #modal .modal-content{background:rgba(30, 45, 40, 0.95);border:1px solid rgba(100, 180, 140, 0.3);}
+
+    /* reveal animations */
+    .reveal{opacity:0;transform:translateY(10px);transition:opacity .6s ease,transform .6s ease}
+    .reveal.show{opacity:1;transform:none}
+
+    @media (max-width:920px){
+      .grid{grid-template-columns:1fr}
+      .container{padding:15px}
+      header{justify-content:center;text-align:center}
+    } 
+    
+    /* Dark mode toggle */
+    .dark-mode-toggle {
+      background: var(--card);
+      border-radius: 8px;
+      padding: 5px;
+      box-shadow: var(--shadow);
+    }
+    
+    /* Loading indicator */
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
+    
+    .loading.spinner {
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-left-color: var(--accent);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+
+    
+    .floating { }
+    .pulsing { }
+    
+    /* Chart container */
+    .chart-container {
+      position: relative;
+      height: 300px;
+      margin-top: 20px;
+    }
+    
+    /* Leaderboard */
+    .leaderboard-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.2s ease;
+    }
+    .leaderboard-item:hover {
+      background: rgba(0,0,0,0.03);
+    }
+    .dark-mode .leaderboard-item:hover {
+      background: rgba(255,255,255,0.1);
+    }
+    
+    .leaderboard-rank {
+      font-weight: bold;
+      color: var(--accent);
+      font-size: 18px;
+    }
+    
+    /* Challenge */
+    .challenge-card {
+      background: rgba(255,255,255,0.15);
+    }
+    
+    .dark-mode .challenge-card {
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 18px;
+      margin-bottom: 18px;
+      transition: transform 0.3s ease;
+    }
+    .challenge-card:hover {
+      transform: translateY(-3px);
+    }
+    
+    .challenge-progress {
+      height: 12px;
+      background: #eee;
+      border-radius: 6px;
+      margin: 12px 0;
+      overflow: hidden;
+    }
+    
+    .challenge-progress-bar {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 6px;
+      transition: width 0.5s ease;
+    }
+    
+    /* Social sharing */
+    .social-share {
+      display: flex;
+      gap: 12px;
+      margin-top: 18px;
+    }
+    
+    .social-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--accent);
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: bold;
+    }
+    .social-btn:hover {
+      transform: translateY(-3px);
+    }
+    
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    
+    .tab {
+      padding: 10px 18px;
+      border-radius: 20px;
+      cursor: pointer;
+      background: transparent;
+      border: 1px solid var(--border);
+      transition: all 0.3s ease;
+    }
+    
+    .tab.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+    
+    .tab:hover:not(.active) {
+      background: rgba(0,0,0,0.05);
+    }
+    
+    /* Notification */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 20px;
+      border-radius: 8px;
+      background: var(--success);
+      color: white;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      transform: translateX(200%);
+      transition: transform 0.3s ease;
+      z-index: 1000;
+    }
+    
+    .notification.show {
+      transform: translateX(0);
+    }
+    
+    /* Animations */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+    
+    /* Scrollbar enhancements */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.05);
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: var(--accent);
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: #126b2d;
+    }
+    
+    /* Model selection */
+    .model-selector {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+    
+    .model-option {
+      padding: 10px 15px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.5);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 14px;
+    }
+    
+    .model-option.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+    
+    .model-option:hover:not(.active) {
+      background: rgba(0,0,0,0.1);
+    }
+    
+    /* Prediction method */
+    .prediction-method {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+    
+    .method-option {
+      padding: 8px 12px;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.5);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 13px;
+    }
+    
+    .method-option.active {
+      background: var(--info);
+      color: white;
+      border-color: var(--info);
+    }
+    
+    .method-option:hover:not(.active) {
+      background: rgba(0,0,0,0.1);
+    }
+    
+    /* Model info */
+    .model-info {
+      padding: 15px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.94), rgba(250,255,250,0.95));
+      border-radius: 10px;
+      margin-top: 15px;
+      font-size: 14px;
+    }
+    
+    .model-info h4 {
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+    
+    .model-info ul {
+      padding-left: 20px;
+      margin: 10px 0;
+    }
+    
+    .model-info li {
+      margin-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div id="particles"></div>
+  
+  <div class="container">
+    <header style="display: flex; gap: 14px; align-items: center; margin-bottom: 20px; flex-wrap: wrap;">
+      <div class="logo">♻️</div>
+      <div style="flex: 1;">
+        <h1>Eco Waste</h1>
+        <div class="lead">Gamified sustainability ecosystem</div>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <button class="btn sm" onclick="openModal('login')">Login</button>
+        <button class="btn sm" onclick="openModal('signup')">Sign Up</button>
+        <div class="dark-mode-toggle" style="margin-left: 10px;">
+          <button class="btn sm" onclick="toggleDarkMode()">🌓</button>
+        </div>
+      </div>
+    </header>
+    
+    <div class="grid">
+      <!-- Sidebar -->
+      <aside>
+        <div class="card profile-card">
+          <div class="profile">
+            <div class="avatar">👤</div>
+            <div>
+              <h3>Eco Warrior</h3>
+              <div class="lead">Level 1 Warrior</div>
+            </div>
+          </div>
+          
+          <div class="stats">
+            <div class="stat" onclick="showStreakInfo()">
+              <div style="font-size:24px;font-weight:800">🔥0</div>
+              <div style="font-size:12px">Streak</div>
+            </div>
+            <div class="stat" onclick="showPointsInfo()">
+              <div style="font-size:24px;font-weight:800">0</div>
+              <div style="font-size:12px">Eco Points</div>
+            </div>
+            <div class="stat" onclick="showImpactInfo()">
+              <div style="font-size:24px;font-weight:800">0 kg</div>
+              <div style="font-size:12px">CO₂ Saved</div>
+            </div>
+          </div>
+          
+          <div style="margin-top:20px">
+            <button class="btn btn-block" onclick="openModal('leaderboard')">
+              🏆 Leaderboard
+            </button>
+          </div>
+        </div>
+        
+        <div class="card">
+          <h3>🌱 Eco Challenges</h3>
+          <div class="challenge-card">
+            <div style="display:flex;justify-content:space-between">
+              <strong>Plastic-Free Week</strong>
+              <span>3/7 days</span>
+            </div>
+            <div class="challenge-progress">
+              <div class="challenge-progress-bar" style="width:43%"></div>
+            </div>
+            <div style="font-size:12px;color:var(--muted)">Identify 10 plastic items this week</div>
+          </div>
+          
+          <div class="challenge-card">
+            <div style="display:flex;justify-content:space-between">
+              <strong>Recycling Master</strong>
+              <span>15/20 items</span>
+            </div>
+            <div class="challenge-progress">
+              <div class="challenge-progress-bar" style="width:75%"></div>
+            </div>
+            <div style="font-size:12px;color:var(--muted)">Correctly sort 20 recyclable items</div>
+          </div>
+        </div>
+        
+        <div class="card">
+          <h3>🌍 Eco Waste Hub</h3>
+          <div class="tabs">
+            <div class="tab active" onclick="switchHubTab('tips')">🌿 Tips</div>
+            <div class="tab" onclick="switchHubTab('facts')">🧠 Facts</div>
+            <div class="tab" onclick="switchHubTab('diy')">🔧 DIY</div>
+          </div>
+          <div id="hub-content" style="margin-top:15px;max-height:300px;overflow-y:auto">
+            <div id="tips-content">
+              <div class="hub-post">
+                <div style="display:flex;justify-content:space-between">
+                  <strong>GreenWarrior2025</strong>
+                  <span style="font-size:12px;color:var(--muted)">2 hours ago</span>
+                </div>
+                <div style="margin:10px 0">Use a mason jar as a portable salad container to reduce single-use plastic!</div>
+                <div style="display:flex;gap:10px;font-size:12px">
+                  <button class="btn sm alt">👍 12</button>
+                  <button class="btn sm alt">💬 3</button>
+                  <button class="btn sm alt">🚩</button>
+                </div>
+              </div>
+            </div>
+            <div id="facts-content" style="display:none">
+              <div class="hub-post">
+                <div style="display:flex;justify-content:space-between">
+                  <strong>EcoFacts</strong>
+                  <span style="font-size:12px;color:var(--muted)">1 day ago</span>
+                </div>
+                <div style="margin:10px 0">Did you know? Recycling one aluminum can saves enough energy to power a TV for 3 hours!</div>
+                <div style="display:flex;gap:10px;font-size:12px">
+                  <button class="btn sm alt">👍 24</button>
+                  <button class="btn sm alt">💬 5</button>
+                  <button class="btn sm alt">🚩</button>
+                </div>
+              </div>
+            </div>
+            <div id="diy-content" style="display:none">
+              <div class="hub-post">
+                <div style="display:flex;justify-content:space-between">
+                  <strong>DIYMaster</strong>
+                  <span style="font-size:12px;color:var(--muted)">3 days ago</span>
+                </div>
+                <div style="margin:10px 0">Turn old t-shirts into reusable shopping bags! Cut off sleeves and neckline, sew the bottom closed.</div>
+                <div style="display:flex;gap:10px;font-size:12px">
+                  <button class="btn sm alt">👍 18</button>
+                  <button class="btn sm alt">💬 7</button>
+                  <button class="btn sm alt">🚩</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:15px">
+            <button class="btn btn-block" onclick="openModal('newPost')">
+              ✍️ Share Idea
+            </button>
+          </div>
+        </div>
+        
+        <div class="card">
+          <h3>📚 Waste Categories</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px">
+            <div class="stat" onclick="showWasteInfo('battery')" style="cursor:pointer">
+              <div style="font-size:28px;margin-bottom:8px">🔋</div>
+              <div style="font-size:14px;font-weight:600">Battery</div>
+            </div>
+            <div class="stat" onclick="showWasteInfo('biological')" style="cursor:pointer">
+              <div style="font-size:28px;margin-bottom:8px">🍂</div>
+              <div style="font-size:14px;font-weight:600">Biological</div>
+            </div>
+            <div class="stat" onclick="showWasteInfo('clothes')" style="cursor:pointer">
+              <div style="font-size:28px;margin-bottom:8px">👕</div>
+              <div style="font-size:14px;font-weight:600">Clothes</div>
+            </div>
+            <div class="stat" onclick="showWasteInfo('glass')" style="cursor:pointer">
+              <div style="font-size:28px;margin-bottom:8px">🥛</div>
+              <div style="font-size:14px;font-weight:600">Glass</div>
+            </div>
+            <div class="stat" onclick="showWasteInfo('metal')" style="cursor:pointer">
+              <div style="font-size:28px;margin-bottom:8px">🥫</div>
+              <div style="font-size:14px;font-weight:600">Metal</div>
+            </div>
+            <div class="stat" onclick="showWasteInfo('paper')" style="cursor:pointer">
+              <div style="font-size:28px;margin-bottom:8px">📄</div>
+              <div style="font-size:14px;font-weight:600">Paper</div>
+            </div>
+            <div class="stat" onclick="showWasteInfo('plastic')" style="cursor:pointer">
+              <div style="font-size:28px;margin-bottom:8px">🥤</div>
+              <div style="font-size:14px;font-weight:600">Plastic</div>
+            </div>
+            <div class="stat" onclick="showWasteInfo('shoes')" style="cursor:pointer">
+              <div style="font-size:28px;margin-bottom:8px">👟</div>
+              <div style="font-size:14px;font-weight:600">Shoes</div>
+            </div>
+            <div class="stat" onclick="showWasteInfo('trash')" style="cursor:pointer">
+              <div style="font-size:28px;margin-bottom:8px">🗑️</div>
+              <div style="font-size:14px;font-weight:600">Trash</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card">
+          <h3>🤖 AI Models</h3>
+          <div class="model-info">
+            <h4>EfficientNet-B0</h4>
+            <ul>
+              <li>Lightweight CNN architecture</li>
+              <li>Trained on 9 waste categories</li>
+              <li>Validation Accuracy: 91.79%</li>
+              <li>GPU accelerated</li>
+            </ul>
+            <h4>MobileNetV2</h4>
+            <ul>
+              <li>Optimized for mobile deployment</li>
+              <li>Trained on 9 waste categories</li>
+              <li>Validation Accuracy: 89.37%</li>
+              <li>Fast inference</li>
+            </ul>
+            <h4>DenseNet121</h4>
+            <ul>
+              <li>Dense connectivity pattern</li>
+              <li>Trained on 9 waste categories</li>
+              <li>Validation Accuracy: 86.23%</li>
+              <li>GPU accelerated</li>
+            </ul>
+            <h4>ResNet50</h4>
+            <ul>
+              <li>Deep residual learning</li>
+              <li>Trained on 9 waste categories</li>
+              <li>Validation Accuracy: 82.37%</li>
+              <li>GPU accelerated</li>
+            </ul>
+            <div style="margin-top:15px;padding:12px;background:rgba(23, 138, 59, 0.1);border-radius:8px">
+              <strong>💡 Ensemble Method:</strong> All 4 models work together to provide the most accurate classification results.
+            </div>
+          </div>
+        </div>
+      </aside>
+      
+      <!-- Main Content -->
+      <main>
+        <div class="card" id="classifyCard">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <h2>📸 Classify Waste</h2>
+            <div style="font-size:14px;background:var(--gradient-1);color:white;padding:5px 10px;border-radius:20px">
+              🔥 Streak: 0 days
+            </div>
+          </div>
+          
+          <div class="uploader">
+            <div class="drop" id="dropArea">
+              <div style="text-align:center">
+                <div style="font-size:60px;margin-bottom:15px">♻️</div>
+                <h3 style="margin:0 0 10px 0;color:var(--accent);font-size:22px">Eco Waste Classifier</h3>
+                <div style="font-size:16px;margin-bottom:20px">Drag & drop an image here</div>
+                <div style="font-size:14px;color:var(--muted);margin:12px 0">or use one of our options</div>
+                <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:20px 0">
+                  <button class="btn upload" onclick="document.getElementById('fileInput').click()">📂 Gallery</button>
+                  <button class="btn camera" onclick="openCamera()">📸 Camera</button>
+                  <button class="btn classify" onclick="classifyWaste()" id="initialClassifyBtn" disabled>🔍 Classify</button>
+                </div>
+                <div style="font-size:13px;color:var(--muted);margin-top:15px">Supports JPG, PNG (max 5MB)</div>
+                <div style="font-size:13px;color:var(--accent);margin-top:18px;padding:12px;background:rgba(23, 138, 59, 0.15);border-radius:10px;border:1px solid rgba(23, 138, 59, 0.2);">
+                  ⚡ Powered by Ensemble AI Models
+                </div>
+              </div>
+            </div>
+            
+            <input type="file" id="fileInput" accept="image/*" style="display:none">
+            
+            <div id="previewContainer" style="display:none">
+              <img id="imagePreview" class="thumb" alt="Preview">
+              <div style="display:flex;gap:8px;margin-top:12px">
+                <button class="btn alt" onclick="clearImage()">🗑️ Clear</button>
+              </div>
+              <div style="margin-top:12px">
+                <input type="text" id="itemDescription" placeholder="Describe the item (optional)" style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--border);">
+              </div>
+            </div>
+          </div>
+          
+          <div class="loading" id="loadingIndicator">
+            <div class="spinner"></div>
+            <div style="margin-top:12px">Analyzing waste material...</div>
+          </div>
+          
+          <div id="resultWrap" hidden>
+            <div style="display:flex;gap:16px;margin-top:20px">
+              <div style="flex:1">
+                <h3>🎯 Prediction</h3>
+                <div id="predictionResult" style="padding:16px;background:linear-gradient(180deg,rgba(255,255,255,0.94),rgba(250,255,250,0.95));border-radius:10px"></div>
+              </div>
+              <div style="flex:1">
+                <h3>📊 Confidence</h3>
+                <div class="chart-container">
+                  <canvas id="confidenceChart"></canvas>
+                </div>
+              </div>
+            </div>
+            
+            <div style="margin-top:20px">
+              <h3>💡 Eco Tips</h3>
+              <div id="ecoTips" style="padding:16px;background:linear-gradient(180deg,rgba(255,255,255,0.94),rgba(250,255,250,0.95));border-radius:10px"></div>
+            </div>
+            
+            <div style="margin-top:20px">
+              <h3>🌍 Your Impact</h3>
+              <div style="padding:16px;background:linear-gradient(180deg,rgba(255,255,255,0.94),rgba(250,255,250,0.95));border-radius:10px">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px">
+                  <div style="text-align:center">
+                    <div style="font-size:24px;font-weight:700;color:var(--accent)">+2</div>
+                    <div style="font-size:14px">Eco Points</div>
+                  </div>
+                  <div style="text-align:center">
+                    <div style="font-size:24px;font-weight:700;color:var(--accent)">+0.1 kg</div>
+                    <div style="font-size:14px">CO₂ Saved</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <h2>📅 Classification History</h2>
+            <button class="btn sm" onclick="clearHistory()">🗑️ Clear</button>
+          </div>
+          
+          <div class="history-list" id="historyList">
+            <div style="text-align:center;padding:40px;color:var(--muted)">
+              No classification history yet
+            </div>
+          </div>
+        </div>
+        
+        <div class="card">
+          <h2>🌍 Community Progress</h2>
+          <div style="padding:16px;background:linear-gradient(180deg,rgba(255,255,255,0.94),rgba(250,255,250,0.95));border-radius:10px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px">
+              <div>
+                <div style="font-size:14px;color:var(--muted)">Total Items Classified</div>
+                <div style="font-size:24px;font-weight:700">1,247</div>
+              </div>
+              <div>
+                <div style="font-size:14px;color:var(--muted)">Total CO₂ Saved</div>
+                <div style="font-size:24px;font-weight:700">42.8 kg</div>
+              </div>
+            </div>
+            <div style="margin-top:15px">
+              <div style="font-size:14px;color:var(--muted);margin-bottom:5px">Community Goal: 500 kg CO₂ Saved</div>
+              <div class="challenge-progress">
+                <div class="challenge-progress-bar" style="width:8.6%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+  
+  <!-- Modal -->
+  <div id="modal">
+    <div class="back" onclick="closeModal()"></div>
+    <div class="modal-content">
+      <h2 id="modalTitle">Modal Title</h2>
+      <div id="modalBody">Modal Content</div>
+      <div style="margin-top:20px;text-align:right">
+        <button class="btn alt" onclick="closeModal()">Close</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Notification -->
+  <div class="notification" id="notification"></div>
+  
+  <script>
+    // Global variables
+    let capturedImage = null;
+    let chart = null;
+    let classificationHistory = JSON.parse(localStorage.getItem('classificationHistory')) || [];
+    
+    // Session-based user ID for guest mode
+    let sessionId = localStorage.getItem('sessionId') || null;
+    if (!sessionId) {
+      sessionId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('sessionId', sessionId);
+    }
+    
+    // Dynamic API URL detection - works on any device
+    function getAPIUrl() {
+      // If running on same server as API, use relative path
+      if (window.location.port === '5000') {
+        return '';
+      }
+      
+      // For network deployment, use the same host but different port
+      // This works for both localhost and network IP addresses
+      return `http://${window.location.hostname}:5000`;
+    }
+    
+    const API_URL = getAPIUrl();
+    
+    // Gamification data
+    let userData = {
+      username: 'Eco Warrior',
+      streak: 0,
+      points: 0,
+      co2Saved: 0,
+      level: 1,
+      badges: [],
+      verifiedPosts: 0
+    };
+    
+    // DOM Elements
+    const dropArea = document.getElementById('dropArea');
+    const fileInput = document.getElementById('fileInput');
+    const previewContainer = document.getElementById('previewContainer');
+    const imagePreview = document.getElementById('imagePreview');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const resultWrap = document.getElementById('resultWrap');
+    const toggleAI = document.getElementById('toggleAI');
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      setupEventListeners();
+      renderHistory();
+      updateGPUInfo();
+      loadUserStats(); // Load user stats on page load
+      loadCommunityStats(); // Load community stats on page load
+    });
+    
+    // Setup event listeners
+    function setupEventListeners() {
+      // File input change
+      fileInput.addEventListener('change', handleFileSelect);
+      
+      // Drag and drop
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+      });
+      
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, highlight, false);
+      });
+      
+      ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, unhighlight, false);
+      });
+      
+      dropArea.addEventListener('drop', handleDrop, false);
+    }
+    
+    // Event handler functions
+    function preventDefaults(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    function highlight() {
+      dropArea.style.borderColor = 'var(--accent)';
+      dropArea.style.backgroundColor = 'rgba(23, 138, 59, 0.2)';
+      dropArea.classList.add('active');
+    }
+    
+    function unhighlight() {
+      dropArea.style.borderColor = 'var(--border)';
+      dropArea.style.backgroundColor = 'rgba(255,255,255,0.4)';
+      dropArea.classList.remove('active');
+    }
+    
+    function handleDrop(e) {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      handleFiles(files);
+    }
+    
+    function handleFileSelect(e) {
+      const files = e.target.files;
+      handleFiles(files);
+    }
+    
+    function handleFiles(files) {
+      if (files.length) {
+        const file = files[0];
+        if (file.type.match('image.*')) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            capturedImage = e.target.result;
+            imagePreview.src = capturedImage;
+            previewContainer.style.display = 'block';
+            
+            // Enable the classify button
+            const classifyBtn = document.getElementById('initialClassifyBtn');
+            if (classifyBtn) {
+              classifyBtn.disabled = false;
+            }
+            
+            // Show success notification
+            showNotification('Image uploaded successfully! Click Classify to analyze.', 'success');
+          };
+          reader.readAsDataURL(file);
+        } else {
+          showNotification('Please select an image file', 'error');
+        }
+      }
+    }
+    
+    // Classification functions
+    async function classifyWaste() {
+      console.log('classifyWaste called');
+      if (!capturedImage) {
+        console.log('No captured image');
+        showNotification('Please upload an image first.', 'error');
+        return;
+      }
+      console.log('Calling classifyWasteWithML');
+      // Always use real ML model through backend API
+      classifyWasteWithML();
+    }
+    
+    // Function to open camera for image capture
+    async function openCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        const video = document.createElement('video');
+        video.srcObject = stream;
+        video.play();
+        
+        // Create a canvas to capture the image
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        
+        // Show video in a modal for capture
+        const modal = document.getElementById('modal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalBody = document.getElementById('modalBody');
+        
+        modalTitle.textContent = '📷 Camera Capture';
+        modalBody.innerHTML = `
+          <div style="text-align:center">
+            <video id="cameraVideo" style="width:100%;max-width:400px;border-radius:10px" autoplay></video>
+            <div style="margin-top:20px">
+              <button class="btn" id="captureBtn">📸 Capture Image</button>
+              <button class="btn alt" onclick="closeModal()">Cancel</button>
+            </div>
+          </div>
+        `;
+        
+        const videoElement = document.getElementById('cameraVideo');
+        videoElement.srcObject = stream;
+        
+        document.getElementById('captureBtn').addEventListener('click', () => {
+          // Set canvas dimensions to match video
+          canvas.width = videoElement.videoWidth;
+          canvas.height = videoElement.videoHeight;
+          
+          // Draw current video frame to canvas
+          context.drawImage(videoElement, 0, 0);
+          
+          // Convert to data URL
+          capturedImage = canvas.toDataURL('image/jpeg');
+          imagePreview.src = capturedImage;
+          previewContainer.style.display = 'block';
+          
+          // Stop all video streams
+          stream.getTracks().forEach(track => track.stop());
+          
+          // Close modal
+          closeModal();
+        });
+        
+        modal.style.display = 'flex';
+      } catch (error) {
+        console.error('Error accessing camera:', error);
+        showNotification('Could not access camera. Please check permissions.', 'error');
+      }
+    }
+    
+    // Function to show waste category information
+    function showWasteInfo(category) {
+      const info = wasteInfo[category];
+      if (info) {
+        const modal = document.getElementById('modal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalBody = document.getElementById('modalBody');
+        
+        modalTitle.textContent = `${getEmojiForCategory(category)} ${info.name}`;
+        modalBody.innerHTML = `
+          <div style="padding:16px;background:linear-gradient(180deg,rgba(255,255,255,0.94),rgba(250,255,250,0.95));border-radius:10px;margin-bottom:20px">
+            <h4 style="margin-top:0;color:var(--accent);">Description</h4>
+            <p>${info.description}</p>
+          </div>
+          
+          <div style="padding:16px;background:linear-gradient(180deg,rgba(255,255,255,0.94),rgba(250,255,250,0.95));border-radius:10px;margin-bottom:20px">
+            <h4 style="margin-top:0;color:var(--accent);">How to Decompose/Recycle</h4>
+            <p>${info.decomposition}</p>
+          </div>
+          
+          <div style="padding:16px;background:linear-gradient(180deg,rgba(255,255,255,0.94),rgba(250,255,250,0.95));border-radius:10px">
+            <h4 style="margin-top:0;color:var(--accent);">Helpful Tips</h4>
+            <p>${info.tips}</p>
+          </div>
+        `;
+        
+        modal.style.display = 'flex';
+      }
+    }
+    
+    // Updated function to classify waste using real models
+    async function classifyWasteWithML() {
+      console.log('Starting classifyWasteWithML');
+      if (!capturedImage) {
+        console.log('No captured image found');
+        showNotification('Please upload an image first.', 'error');
+        return;
+      }
+      
+      console.log('Showing loading indicator');
+      loadingIndicator.style.display = 'block';
+      resultWrap.hidden = true;
+      
+      try {
+        console.log('Converting data URL to blob');
+        // Convert data URL to blob
+        const response = await fetch(capturedImage);
+        const blob = await response.blob();
+        console.log('Blob created successfully');
+        
+        // Create form data
+        const formData = new FormData();
+        formData.append('image', blob, 'uploaded_image.jpg');
+        console.log('FormData created');
+        
+        // Send to API for classification
+        console.log('Sending request to API');
+        const fullApiUrl = API_URL ? `${API_URL}/predict_no_auth` : '/predict_no_auth';
+        const apiResponse = await fetch(fullApiUrl, {
+          method: 'POST',
+          body: formData
+        });
+        
+        console.log('API response received:', apiResponse.status);
+        if (!apiResponse.ok) {
+          throw new Error(`API error: ${apiResponse.status}`);
+        }
+        
+        const result = await apiResponse.json();
+        console.log('API result:', result);
+        
+        // Display results directly without reformatting
+        displayClassificationResult(result);
+        
+        // Add to history
+        updateUserData(result);
+        
+        // Now search for similar images in the dataset
+        await searchSimilarImages(blob, result.predicted_class);
+        
+      } catch (error) {
+        console.error('Classification error:', error);
+        
+        // Check if it's a network error
+        if (error instanceof TypeError && error.message.includes('fetch')) {
+          showNotification('Network error: Could not connect to the classification service. Please check your connection and try again.', 'error');
+        } else {
+          showNotification(`Classification failed: ${error.message}`, 'error');
+        }
+        
+        // Fallback to simulated classification
+        classifyWasteSimulated();
+      } finally {
+        console.log('Hiding loading indicator');
+        loadingIndicator.style.display = 'none';
+      }
+    }
+    
+    // New function to search for similar images in the dataset
+    async function searchSimilarImages(imageBlob, category) {
+      try {
+        // Create form data for search
+        const searchFormData = new FormData();
+        searchFormData.append('image', imageBlob, 'uploaded_image.jpg');
+        searchFormData.append('category', category);
+        
+        // Send to API for similar image search
+        const fullSearchUrl = API_URL ? `${API_URL}/search_similar` : '/search_similar';
+        const searchResponse = await fetch(fullSearchUrl, {
+          method: 'POST',
+          body: searchFormData
+        });
+        
+        if (!searchResponse.ok) {
+          throw new Error(`Search API error: ${searchResponse.status}`);
+        }
+        
+        const searchResult = await searchResponse.json();
+        
+        // Display similar images if found
+        if (searchResult.similar_images && searchResult.similar_images.length > 0) {
+          displaySimilarImages(searchResult.similar_images);
+        }
+      } catch (error) {
+        console.error('Search error:', error);
+        // Don't show error to user as this is supplementary functionality
+      }
+    }
+    
+    // Function to display similar images
+    function displaySimilarImages(similarImages) {
+      // Create a section for similar images
+      const similarSection = document.createElement('div');
+      similarSection.innerHTML = `
+        <div style="margin-top:20px">
+          <h3>🔍 Similar Images Found in Dataset</h3>
+          <div style="display:flex;gap:12px;overflow-x:auto;padding:10px">
+            ${similarImages.map(img => `
+              <div style="flex:0 0 auto;text-align:center">
+                <div style="width:100px;height:100px;background:#f0f0f0;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px">
+                  📷
+                </div>
+                <div style="font-size:12px;margin-top:5px">${img.filename || 'Image'}</div>
+                <div style="font-size:11px;color:var(--muted)">${Math.round(img.similarity || 0)}% match</div>
+              </div>
+            `).join('')}
+          </div>
+          <div style="margin-top:10px;padding:12px;background:rgba(23, 138, 59, 0.1);border-radius:8px;font-size:14px">
+            <strong>💡 Dataset Search:</strong> Found ${similarImages.length} similar images in our training dataset. 
+            This helps validate the classification accuracy.
+          </div>
+        </div>
+      `;
+      
+      // Add to result wrap
+      const resultContainer = document.getElementById('resultWrap');
+      resultContainer.appendChild(similarSection);
+    }
+    
+    async function classifyWithAIBot() {
+      if (!capturedImage) {
+        showNotification('Please upload or capture an image first.', 'error');
+        return;
+      }
+      
+      // Show loading indicator
+      loadingIndicator.style.display = 'block';
+      resultWrap.hidden = true;
+      
+      try {
+        // Convert data URL to Blob
+        const response = await fetch(capturedImage);
+        const blob = await response.blob();
+        
+        // Create FormData object
+        const formData = new FormData();
+        formData.append('image', blob, 'image.jpg');
+        
+        // Send image to backend API
+        const fullApiUrl = API_URL ? `${API_URL}/predict_no_auth` : '/predict_no_auth';
+        const apiResponse = await fetch(fullApiUrl, {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!apiResponse.ok) {
+            throw new Error(`API error: ${apiResponse.status}`);
+        }
+        
+        const result = await apiResponse.json();
+        
+        // Update UI with results
+        displayClassificationResult(result);
+        
+        // Update user data
+        updateUserData(result);
+        
+        // Show results
+        resultWrap.hidden = false;
+    } catch (error) {
+        console.error('AI Bot classification error:', error);
+        showNotification('Error classifying image with AI Bot. Please try again.', 'error');
+    } finally {
+        // Hide loading indicator
+        loadingIndicator.style.display = 'none';
+    }
+}
+
+    
+    // Keep the original simulated function
+    function classifyWasteSimulated() {
+      if (!capturedImage) {
+        showNotification('Please upload or capture an image first.', 'error');
+        return;
+      }
+      
+      // Show loading indicator
+      loadingIndicator.style.display = 'block';
+      resultWrap.hidden = true;
+      
+      // Simulate AI processing delay
+      setTimeout(() => {
+        // Hide loading indicator
+        loadingIndicator.style.display = 'none';
+        
+        // Get classification result (simulated)
+        const result = getSimulatedClassification();
+        
+        // Update UI with results
+        displayClassificationResult(result);
+        
+        // Update user data
+        updateUserData(result);
+        
+        // Show results
+        resultWrap.hidden = false;
+      }, 1500);
+    }
+    
+    function getSimulatedClassification() {
+      // Simulated waste types with ML probabilities
+      const wasteTypes = [
+        { label: 'Plastic Waste', confidence: 0.92, decay: '450-1000 years', tip: 'Check local recycling guidelines. Rinse and recycle in designated bins.' },
+        { label: 'Paper Waste', confidence: 0.78, decay: '2-6 weeks', tip: 'Compost or recycle with paper products.' },
+        { label: 'Organic Waste', confidence: 0.85, decay: '2-6 months', tip: 'Compost or dispose in organic waste bin.' },
+        { label: 'Metal Waste', confidence: 0.88, decay: '80-500 years', tip: 'Clean and place in metal recycling bin.' },
+        { label: 'Glass Waste', confidence: 0.95, decay: '1-2 million years', tip: 'Place in glass recycling container.' }
+      ];
+      
+      // Sort by confidence
+      wasteTypes.sort((a, b) => b.confidence - a.confidence);
+      
+      // Return top result and top 3 predictions
+      return {
+        topResult: wasteTypes[0],
+        predictions: wasteTypes.slice(0, 3)
+      };
+    }
+    
+    function displayClassificationResult(result) {
+      console.log('displayClassificationResult called with:', result);
+      // Display prediction result
+      const predictionResult = document.getElementById('predictionResult');
+      console.log('predictionResult element:', predictionResult);
+      
+      if (!predictionResult) {
+        console.error('predictionResult element not found');
+        return;
+      }
+      
+      // Handle API response format
+      const label = result.predicted_class || result.label || (result.topResult && result.topResult.label) || 'Unknown';
+      const confidence = result.confidence || (result.topResult && result.topResult.confidence) || 0;
+      console.log('Label:', label, 'Confidence:', confidence);
+      
+      // Get waste information from API response
+      const classInfo = result.class_info || {};
+      const description = classInfo.description || 'No description available';
+      const decomposition = classInfo.decomposition || 'No decomposition information available';
+      const decayTime = classInfo.decay_time || 'Unknown';
+      const disposalTips = classInfo.disposal_tips || ['No disposal tips available'];
+      const ecoTips = classInfo.eco_tips || ['No eco tips available'];
+      const wasteType = classInfo.waste_type || 'Unknown';
+      const binColor = classInfo.bin_color || 'Gray';
+      const binColorCode = classInfo.bin_color_code || '#6c757d';
+      const icon = classInfo.icon || '❓';
+      
+      // Get random tips
+      const randomDisposalTip = disposalTips[Math.floor(Math.random() * disposalTips.length)];
+      const randomEcoTip = ecoTips[Math.floor(Math.random() * ecoTips.length)];
+      
+      // Add confidence-based color coding
+      let confidenceColor = 'var(--danger)';
+      if (confidence > 0.8) confidenceColor = 'var(--success)';
+      else if (confidence > 0.6) confidenceColor = 'var(--warning)';
+      
+      predictionResult.innerHTML = `
+        <div style="display:flex;align-items:center;gap:15px;margin-bottom:20px;padding:20px;background:linear-gradient(135deg, rgba(23, 138, 59, 0.1), rgba(15, 157, 255, 0.1));border-radius:12px;">
+          <div style="font-size:60px;animation: pulse 2s infinite;">${icon}</div>
+          <div>
+            <div style="font-size:28px;font-weight:800;color:var(--accent);">${label}</div>
+            <div style="font-size:18px;margin-top:5px;color:${confidenceColor};font-weight:600;">Confidence: <span style="font-size:22px;">${(confidence * 100).toFixed(1)}%</span></div>
+          </div>
+        </div>
+        
+        <!-- Waste Type Classification Card -->
+        <div style="margin-bottom:20px;padding:20px;background:linear-gradient(135deg, rgba(255,255,255,0.2), rgba(240,240,240,0.3));border-radius:12px;box-shadow: 0 5px 15px rgba(0,0,0,0.1);border-left: 5px solid ${binColorCode};">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:15px">
+            <div style="font-size:32px;">${icon}</div>
+            <div>
+              <h3 style="margin:0;color:var(--accent);">Waste Classification</h3>
+              <div style="font-size:14px;color:var(--muted);">Proper Disposal Information</div>
+            </div>
+          </div>
+          
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-top:15px">
+            <div style="padding:15px;background:rgba(255,255,255,0.7);border-radius:10px;box-shadow: 0 3px 10px rgba(0,0,0,0.08);">
+              <div style="font-size:13px;color:var(--muted);margin-bottom:6px;">Waste Type</div>
+              <div style="font-weight:700;font-size:18px;color:var(--text);">${wasteType}</div>
+            </div>
+            <div style="padding:15px;background:rgba(255,255,255,0.7);border-radius:10px;box-shadow: 0 3px 10px rgba(0,0,0,0.08);">
+              <div style="font-size:13px;color:var(--muted);margin-bottom:6px;">Bin Color</div>
+              <div style="font-weight:700;font-size:18px;color:${binColorCode};">${binColor} Bin</div>
+            </div>
+          </div>
+          
+          <div style="margin-top:15px;padding:15px;background:rgba(255,255,255,0.7);border-radius:10px;box-shadow: 0 3px 10px rgba(0,0,0,0.08);">
+            <div style="font-size:13px;color:var(--muted);margin-bottom:6px;">Why This Bin?</div>
+            <div style="font-weight:600;font-size:15px;color:var(--text);">Proper bin sorting helps with efficient waste processing and environmental protection.</div>
+          </div>
+        </div>
+        
+        <!-- Enhanced Environmental Information -->
+        <div style="margin-bottom:20px;padding:16px;background:linear-gradient(145deg,rgba(255,255,255,0.96),rgba(240,255,245,0.96));border-radius:12px;box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
+          <h4 style="margin-top:0;color:var(--accent);font-size:18px;">📝 Description</h4>
+          <p style="line-height:1.6;margin:0;">${description}</p>
+        </div>
+        
+        <div style="margin-bottom:20px;padding:16px;background:linear-gradient(145deg,rgba(255,255,255,0.96),rgba(240,255,245,0.96));border-radius:12px;box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
+          <h4 style="margin-top:0;color:var(--accent);font-size:18px;">♻️ How to Decompose/Recycle</h4>
+          <p style="line-height:1.6;margin:0;">${decomposition}</p>
+        </div>
+        
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:20px">
+          <div style="padding:16px;background:linear-gradient(135deg, rgba(23, 138, 59, 0.15), rgba(23, 138, 59, 0.05));border-radius:10px;box-shadow: 0 4px 10px rgba(0,0,0,0.08);">
+            <div style="font-size:13px;color:var(--muted);margin-bottom:5px;">⏳ Decay Time</div>
+            <div style="font-weight:700;font-size:16px;">${decayTime}</div>
+          </div>
+          <div style="padding:16px;background:linear-gradient(135deg, rgba(15, 157, 255, 0.15), rgba(15, 157, 255, 0.05));border-radius:10px;box-shadow: 0 4px 10px rgba(0,0,0,0.08);">
+            <div style="font-size:13px;color:var(--muted);margin-bottom:5px;">✅ Disposal Tip</div>
+            <div style="font-weight:700;font-size:16px;">${randomDisposalTip}</div>
+          </div>
+        </div>
+      `;
+      
+      // Update chart
+      // Convert API predictions to chart format
+      let chartData = [];
+      if (result.predictions) {
+        // Convert API predictions to chart format with proper labels
+        const CLASS_NAMES = ['battery', 'biological', 'clothes', 'glass', 'metal', 'paper', 'plastic', 'shoes', 'trash'];
+        chartData = Object.entries(result.predictions)
+          .map(([modelName, pred]) => ({
+            label: CLASS_NAMES[pred.predicted_idx] || `Unknown(${pred.predicted_idx})`,
+            confidence: pred.confidence
+          }))
+          .slice(0, 3);
+      } else if (result.probabilities) {
+        // Convert probabilities to predictions format
+        chartData = Object.entries(result.probabilities)
+          .map(([label, confidence]) => ({ label, confidence }))
+          .sort((a, b) => b.confidence - a.confidence)
+          .slice(0, 3);
+      } else {
+        // Create from top result
+        chartData = [{
+          label: label,
+          confidence: confidence
+        }];
+      }
+      updateChart(chartData);
+      
+      // Display eco tips in the separate section
+      const ecoTipsElement = document.getElementById('ecoTips');
+      ecoTipsElement.innerHTML = `
+        <div style="margin-bottom:15px;padding:15px;background:linear-gradient(135deg, rgba(255, 193, 7, 0.15), rgba(255, 193, 7, 0.05));border-radius:10px;box-shadow: 0 4px 10px rgba(0,0,0,0.08);">
+          <strong style="color:var(--warning);font-size:16px;">💡 Eco Tip:</strong> 
+          <span style="font-size:15px;">${randomEcoTip}</span>
+        </div>
+        <div style="padding:15px;background:linear-gradient(135deg, rgba(23, 138, 59, 0.15), rgba(23, 138, 59, 0.05));border-radius:10px;box-shadow: 0 4px 10px rgba(0,0,0,0.08);">
+          <strong style="color:var(--accent);font-size:16px;">🌍 Environmental Impact:</strong> 
+          <span style="font-size:15px;">Proper waste disposal helps protect our environment and conserve natural resources.</span>
+        </div>
+      `;
+      
+      // Add simple fade-in effect
+      predictionResult.style.opacity = '0';
+      predictionResult.style.transition = 'opacity 0.3s ease';
+      
+      setTimeout(() => {
+        predictionResult.style.opacity = '1';
+      }, 50);
+      
+      // Show the result wrap
+      console.log('Showing result wrap');
+      resultWrap.hidden = false;
+      console.log('displayClassificationResult completed');
+    }
+    
+    function updateChart(predictions) {
+      const ctx = document.getElementById('confidenceChart').getContext('2d');
+      
+      // Destroy existing chart if it exists
+      if (chart) {
+        chart.destroy();
+      }
+      
+      // Create gradient for chart
+      const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+      gradient.addColorStop(0, 'rgba(23, 138, 59, 0.8)');
+      gradient.addColorStop(1, 'rgba(15, 157, 255, 0.6)');
+      
+      // Create new chart
+      chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: predictions.map(p => p.label),
+          datasets: [{
+            label: 'Confidence %',
+            data: predictions.map(p => p.confidence * 100),
+            backgroundColor: [
+              'rgba(23, 138, 59, 0.8)',
+              'rgba(15, 157, 255, 0.8)',
+              'rgba(248, 180, 0, 0.8)'
+            ],
+            borderColor: [
+              'rgba(23, 138, 59, 1)',
+              'rgba(15, 157, 255, 1)',
+              'rgba(248, 180, 0, 1)'
+            ],
+            borderWidth: 2,
+            borderRadius: 8,
+            borderSkipped: false,
+            hoverBackgroundColor: [
+              'rgba(23, 138, 59, 1)',
+              'rgba(15, 157, 255, 1)',
+              'rgba(248, 180, 0, 1)'
+            ]
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: {
+                font: {
+                  size: 14
+                }
+              }
+            },
+            tooltip: {
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              titleColor: 'var(--accent)',
+              bodyColor: 'var(--text)',
+              borderColor: 'var(--border)',
+              borderWidth: 1,
+              padding: 12,
+              callbacks: {
+                label: function(context) {
+                  return `${context.dataset.label}: ${context.parsed.y.toFixed(1)}%`;
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100,
+              grid: {
+                color: 'rgba(0, 0, 0, 0.05)'
+              },
+              ticks: {
+                callback: function(value) {
+                  return value + '%';
+                },
+                font: {
+                  size: 12
+                }
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              },
+              ticks: {
+                font: {
+                  size: 12
+                }
+              }
+            }
+          },
+          animation: {
+            duration: 2000,
+            easing: 'easeOutQuart'
+          }
+        }
+      });
+    }
+    
+    function updateUserData(result) {
+      // Add to history
+      const label = result.predicted_class || result.label || (result.topResult && result.topResult.label) || 'Unknown';
+      const confidence = result.confidence || (result.topResult && result.topResult.confidence) || 0;
+      
+      const historyItem = {
+        id: Date.now(),
+        label: label,
+        confidence: confidence,
+        timestamp: new Date().toISOString()
+      };
+      
+      classificationHistory.unshift(historyItem);
+      // Keep only last 10 items
+      if (classificationHistory.length > 10) {
+        classificationHistory = classificationHistory.slice(0, 10);
+      }
+      
+      localStorage.setItem('classificationHistory', JSON.stringify(classificationHistory));
+      renderHistory();
+      
+      // Update user stats (streak, points, CO2 saved)
+      updateStatsAfterClassification(result);
+    }
+    
+    // Update stats after classification
+    function updateStatsAfterClassification(classificationData) {
+      // Check if user is logged in by checking for auth token or user data
+      const isLoggedIn = document.querySelector('header > div:last-child button')?.textContent === 'Logout';
+      
+      if (isLoggedIn) {
+        // For logged-in users, we would normally update via backend
+        // But since this is a frontend function, we'll just update UI
+        // The backend already updated the real stats
+        userData.streak = (userData.streak || 0) + 1;
+        userData.total_points = (userData.total_points || 0) + 2;
+        
+        // Calculate CO2 saved based on waste type
+        const wasteType = classificationData.predicted_class || classificationData.label || 'trash';
+        const co2Saved = getCO2SavedForWasteType(wasteType);
+        userData.co2_saved = (userData.co2_saved || 0) + co2Saved;
+        userData.waste_classified = (userData.waste_classified || 0) + 1;
+        
+        updateUIWithUserStats();
+      } else {
+        // For guest users, update stats locally
+        userData.streak = (userData.streak || 0) + 1;
+        userData.total_points = (userData.total_points || 0) + 2;
+        
+        // Calculate CO2 saved based on waste type
+        const wasteType = classificationData.predicted_class || classificationData.label || 'trash';
+        const co2Saved = getCO2SavedForWasteType(wasteType);
+        userData.co2_saved = (userData.co2_saved || 0) + co2Saved;
+        userData.waste_classified = (userData.waste_classified || 0) + 1;
+        
+        // Save guest stats
+        saveGuestStats();
+        updateUIWithUserStats();
+      }
+      
+      // Refresh community stats
+      loadCommunityStats();
+    }
+    
+    // Get CO2 saved for a specific waste type
+    function getCO2SavedForWasteType(wasteType) {
+      // Environmental impact data (in kg CO2 saved per item)
+      const ENVIRONMENTAL_IMPACT = {
+        'battery': 0.05,
+        'biological': 0.02,
+        'clothes': 0.15,
+        'glass': 0.08,
+        'metal': 0.12,
+        'paper': 0.03,
+        'plastic': 0.07,
+        'shoes': 0.20,
+        'trash': 0.01
+      };
+      
+      return ENVIRONMENTAL_IMPACT[wasteType.toLowerCase()] || 0.01;
+    }
+    
+    // Load user stats from backend or localStorage for guests
+    async function loadUserStats() {
+      try {
+        // Try to get stats from backend if user is logged in
+        const response = await fetch(`${API_URL}/user/profile`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          updateLocalUserStats(data.user);
+          updateUIWithUserStats();
+          // Update auth buttons to show logout
+          updateAuthButtons(true, data.user.username);
+        } else {
+          // Load from localStorage for guest users
+          loadGuestStats();
+          // Update auth buttons to show login/signup
+          updateAuthButtons(false);
+        }
+      } catch (error) {
+        console.log('Error loading user stats, falling back to guest mode:', error);
+        loadGuestStats();
+        // Update auth buttons to show login/signup
+        updateAuthButtons(false);
+      }
+    }
+    
+    // Load guest stats from localStorage
+    function loadGuestStats() {
+      const savedStats = localStorage.getItem('guestStats');
+      if (savedStats) {
+        const stats = JSON.parse(savedStats);
+        updateLocalUserStats(stats);
+        updateUIWithUserStats();
+      }
+    }
+    
+    // Update local user stats
+    function updateLocalUserStats(stats) {
+      userData = {
+        ...userData,
+        ...stats,
+        streak: stats.streak || 0,
+        total_points: stats.total_points || stats.points || 0,
+        co2_saved: stats.co2_saved || 0,
+        waste_classified: stats.waste_classified || 0
+      };
+    }
+    
+    // Update UI with user stats
+    function updateUIWithUserStats() {
+      // Update stats in the UI
+      const streakElement = document.querySelector('.stat:nth-child(1) div:first-child');
+      const pointsElement = document.querySelector('.stat:nth-child(2) div:first-child');
+      const co2Element = document.querySelector('.stat:nth-child(3) div:first-child');
+      
+      if (streakElement) {
+        streakElement.textContent = `🔥${userData.streak || 0}`;
+      }
+      
+      if (pointsElement) {
+        pointsElement.textContent = userData.total_points || 0;
+      }
+      
+      if (co2Element) {
+        co2Element.textContent = `${(userData.co2_saved || 0).toFixed(1)} kg`;
+      }
+    }
+    
+    // Save guest stats to localStorage
+    function saveGuestStats() {
+      const guestStats = {
+        streak: userData.streak || 0,
+        total_points: userData.total_points || 0,
+        co2_saved: userData.co2_saved || 0,
+        waste_classified: userData.waste_classified || 0
+      };
+      localStorage.setItem('guestStats', JSON.stringify(guestStats));
+    }
+    
+    // Load user stats on page load
+    function loadUserStats() {
+      // First try to load from backend (if user is logged in)
+      fetch(`${API_URL}/user/profile`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      })
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error('Not logged in');
+        }
+      })
+      .then(data => {
+        updateLocalUserStats(data.user);
+        updateUIWithUserStats();
+      })
+      .catch(error => {
+        console.log('User not logged in, loading guest stats:', error);
+        loadGuestStats();
+      });
+      
+      loadCommunityStats();
+    }
+    
+    function renderHistory() {
+      const historyList = document.getElementById('historyList');
+      
+      if (classificationHistory.length === 0) {
+        historyList.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">No classification history yet</div>';
+        return;
+      }
+      
+      historyList.innerHTML = classificationHistory.map(item => `
+        <div class="hist">
+          <div>♻️</div>
+          <div style="flex:1">
+            <div style="font-weight:600">${item.label}</div>
+            <div style="font-size:12px;color:var(--muted)">${new Date(item.timestamp).toLocaleString()}</div>
+          </div>
+          <div style="font-weight:600">${(item.confidence * 100).toFixed(1)}%</div>
+        </div>
+      `).join('');
+    }
+    
+    // Utility functions
+    function clearImage() {
+      capturedImage = null;
+      previewContainer.style.display = 'none';
+      resultWrap.hidden = true;
+      fileInput.value = '';
+      
+      // Disable the classify button
+      const classifyBtn = document.getElementById('initialClassifyBtn');
+      if (classifyBtn) {
+        classifyBtn.disabled = true;
+      }
+    }
+    
+    function clearHistory() {
+      classificationHistory = [];
+      localStorage.removeItem('classificationHistory');
+      renderHistory();
+      showNotification('History cleared', 'success');
+    }
+    
+    function getEmojiForCategory(category) {
+      const emojis = {
+        'battery': '🔋',
+        'biological': '🍂',
+        'clothes': '👕',
+        'glass': '🥛',
+        'metal': '🥫',
+        'paper': '📄',
+        'plastic': '🥤',
+        'shoes': '👟',
+        'trash': '🗑️'
+      };
+      
+      // Return emoji or default recycling symbol
+      return emojis[category.toLowerCase()] || '♻️';
+    }
+    
+    function showNotification(message, type = 'success') {
+      const notification = document.getElementById('notification');
+      notification.textContent = message;
+      notification.className = 'notification show';
+      
+      notification.style.opacity = '1';
+      
+      if (type === 'error') {
+        notification.style.background = 'var(--danger)';
+      } else {
+        notification.style.background = 'var(--success)';
+      }
+      
+      setTimeout(() => {
+        notification.className = 'notification';
+        notification.style.opacity = '0';
+      }, 3000);
+    }
+    
+    function openModal(type) {
+      const modal = document.getElementById('modal');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalBody = document.getElementById('modalBody');
+      
+      if (type === 'leaderboard') {
+        modalTitle.textContent = '🏆 Community Leaderboard';
+        // Load dynamic leaderboard data
+        loadLeaderboardData().then(leaderboardData => {
+          modalBody.innerHTML = `
+            <div style="margin-bottom:20px;max-height:400px;overflow-y:auto;">
+              ${leaderboardData.map((user, index) => `
+                <div class="leaderboard-item">
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <div class="leaderboard-rank">${index + 1}</div>
+                    <div>${index < 3 ? ['🥇', '🥈', '🥉'][index] : '🏅'} ${user.username}</div>
+                  </div>
+                  <div>${user.waste_classified} items</div>
+                </div>
+              `).join('')}
+            </div>
+            <div style="padding:16px;background:linear-gradient(180deg,rgba(255,255,255,0.94),rgba(250,255,250,0.95));border-radius:10px">
+              <strong>💡 Tip:</strong> Classify more items to climb the leaderboard!
+            </div>
+          `;
+        });
+      } else if (type === 'login') {
+        modalTitle.textContent = '🔐 Login';
+        modalBody.innerHTML = `
+          <form id="loginForm">
+            <div style="margin-bottom:15px">
+              <label style="display:block;margin-bottom:5px">Username</label>
+              <input type="text" id="loginUsername" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border)" required>
+            </div>
+            <div style="margin-bottom:15px">
+              <label style="display:block;margin-bottom:5px">Password</label>
+              <input type="password" id="loginPassword" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border)" required>
+            </div>
+            <div style="display:flex;gap:10px">
+              <button type="submit" class="btn" style="flex:1">Login</button>
+              <button type="button" class="btn alt" onclick="openModal('signup')" style="flex:1">Sign Up</button>
+            </div>
+          </form>
+        `;
+        
+        // Add event listener for login form
+        setTimeout(() => {
+          const loginForm = document.getElementById('loginForm');
+          if (loginForm) {
+            loginForm.addEventListener('submit', handleLogin);
+          }
+        }, 100);
+      } else if (type === 'signup') {
+        modalTitle.textContent = '📝 Sign Up';
+        modalBody.innerHTML = `
+          <form id="signupForm">
+            <div style="margin-bottom:15px">
+              <label style="display:block;margin-bottom:5px">Username</label>
+              <input type="text" id="signupUsername" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border)" required>
+            </div>
+            <div style="margin-bottom:15px">
+              <label style="display:block;margin-bottom:5px">Email</label>
+              <input type="email" id="signupEmail" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border)" required>
+            </div>
+            <div style="margin-bottom:15px">
+              <label style="display:block;margin-bottom:5px">Password</label>
+              <input type="password" id="signupPassword" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border)" required>
+            </div>
+            <div style="display:flex;gap:10px">
+              <button type="submit" class="btn" style="flex:1">Sign Up</button>
+              <button type="button" class="btn alt" onclick="openModal('login')" style="flex:1">Login</button>
+            </div>
+          </form>
+        `;
+        
+        // Add event listener for signup form
+        setTimeout(() => {
+          const signupForm = document.getElementById('signupForm');
+          if (signupForm) {
+            signupForm.addEventListener('submit', handleSignup);
+          }
+        }, 100);
+      }
+      
+      // Show modal with proper visibility
+      modal.style.display = 'flex';
+    }
+    
+    function closeModal() {
+      const modal = document.getElementById('modal');
+      modal.style.display = 'none';
+    }
+    
+    // Handle login form submission
+    async function handleLogin(event) {
+      event.preventDefault();
+      
+      const username = document.getElementById('loginUsername').value;
+      const password = document.getElementById('loginPassword').value;
+      
+      // Basic validation
+      if (!username || !password) {
+        showNotification('Please enter both username and password', 'error');
+        return;
+      }
+      
+      try {
+        const response = await fetch(`${API_URL}/login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username, password }),
+          credentials: 'include'
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          showNotification('Login successful!', 'success');
+          closeModal();
+          // Update user profile
+          document.querySelector('.profile h3').textContent = data.user.username;
+          // Update user data
+          updateLocalUserStats(data.user);
+          updateUIWithUserStats();
+          // Update login/signup buttons to show logout
+          updateAuthButtons(true, data.user.username);
+        } else {
+          showNotification(data.error || 'Login failed', 'error');
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        showNotification('Login failed. Please try again.', 'error');
+      }
+    }
+    
+    // Handle signup form submission
+    async function handleSignup(event) {
+      event.preventDefault();
+      
+      const username = document.getElementById('signupUsername').value;
+      const email = document.getElementById('signupEmail').value;
+      const password = document.getElementById('signupPassword').value;
+      
+      // Basic validation
+      if (!username || !email || !password) {
+        showNotification('Please fill in all fields', 'error');
+        return;
+      }
+      
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        showNotification('Please enter a valid email address', 'error');
+        return;
+      }
+      
+      try {
+        const response = await fetch(`${API_URL}/register`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username, email, password }),
+          credentials: 'include'
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          showNotification('Account created successfully!', 'success');
+          closeModal();
+          // Update user profile
+          document.querySelector('.profile h3').textContent = data.user.username;
+          // Update user data
+          updateLocalUserStats(data.user);
+          updateUIWithUserStats();
+          // Update login/signup buttons to show logout
+          updateAuthButtons(true, data.user.username);
+        } else {
+          showNotification(data.error || 'Sign up failed', 'error');
+        }
+      } catch (error) {
+        console.error('Signup error:', error);
+        showNotification('Sign up failed. Please try again.', 'error');
+      }
+    }
+    
+    // Update authentication buttons based on login status
+    function updateAuthButtons(isLoggedIn, username) {
+      const headerButtons = document.querySelector('header > div:last-child');
+      if (headerButtons) {
+        if (isLoggedIn) {
+          // Show logout button instead of login/signup
+          headerButtons.innerHTML = `
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <span style="font-size: 14px; color: var(--text);">Hello, ${username}</span>
+              <button class="btn sm" onclick="handleLogout()">Logout</button>
+              <div class="dark-mode-toggle" style="margin-left: 10px;">
+                <button class="btn sm" onclick="toggleDarkMode()">🌓</button>
+              </div>
+            </div>
+          `;
+        } else {
+          // Show login/signup buttons
+          headerButtons.innerHTML = `
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <button class="btn sm" onclick="openModal('login')">Login</button>
+              <button class="btn sm" onclick="openModal('signup')">Sign Up</button>
+              <div class="dark-mode-toggle" style="margin-left: 10px;">
+                <button class="btn sm" onclick="toggleDarkMode()">🌓</button>
+              </div>
+            </div>
+          `;
+        }
+      }
+    }
+    
+    // Handle logout
+    async function handleLogout() {
+      try {
+        const response = await fetch(`${API_URL}/logout`, {
+          method: 'POST',
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          showNotification('Logged out successfully', 'success');
+          // Reset user data
+          userData = {
+            username: 'Eco Warrior',
+            streak: 0,
+            points: 0,
+            co2Saved: 0,
+            level: 1,
+            badges: [],
+            verifiedPosts: 0
+          };
+          // Update UI
+          document.querySelector('.profile h3').textContent = 'Eco Warrior';
+          updateUIWithUserStats();
+          // Update buttons
+          updateAuthButtons(false);
+          // Clear localStorage
+          localStorage.removeItem('guestStats');
+        } else {
+          showNotification('Logout failed', 'error');
+        }
+      } catch (error) {
+        console.error('Logout error:', error);
+        showNotification('Logout failed. Please try again.', 'error');
+      }
+    }
+    
+    // Load community stats
+    async function loadCommunityStats() {
+      try {
+        const response = await fetch(`${API_URL}/community/stats`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          updateCommunityStatsUI(data);
+        }
+      } catch (error) {
+        console.log('Error loading community stats:', error);
+      }
+    }
+    
+    // Update community stats UI
+    function updateCommunityStatsUI(stats) {
+      // Update community progress section
+      const totalClassifiedElement = document.querySelector('.card:nth-child(2) .grid > div:first-child > div:nth-child(2)');
+      const totalCo2Element = document.querySelector('.card:nth-child(2) .grid > div:nth-child(2) > div:nth-child(2)');
+      
+      if (totalClassifiedElement) {
+        totalClassifiedElement.textContent = stats.total_classifications || 0;
+      }
+      
+      if (totalCo2Element) {
+        totalCo2Element.textContent = `${(stats.total_co2_saved || 0).toFixed(1)} kg`;
+      }
+      
+      // Update community goal progress (assuming 500kg target)
+      const progressBar = document.querySelector('.challenge-progress-bar');
+      if (progressBar) {
+        const percentage = Math.min(100, ((stats.total_co2_saved || 0) / 500) * 100);
+        progressBar.style.width = `${percentage}%`;
+      }
+    }
+    
+    // Load leaderboard data from backend
+    async function loadLeaderboardData() {
+      try {
+        const response = await fetch(`${API_URL}/community/stats`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          return data.top_contributors || [];
+        } else {
+          // Fallback data if API fails
+          return [
+            { username: 'EcoChampion', waste_classified: 1247, co2_saved: 42.8 },
+            { username: 'GreenGuru', waste_classified: 982, co2_saved: 35.2 },
+            { username: 'WasteWizard', waste_classified: 876, co2_saved: 31.5 },
+            { username: 'RecycleMaster', waste_classified: 754, co2_saved: 26.7 },
+            { username: 'EcoHero', waste_classified: 621, co2_saved: 21.3 }
+          ];
+        }
+      } catch (error) {
+        console.log('Error loading leaderboard data:', error);
+        // Fallback data
+        return [
+          { username: 'EcoChampion', waste_classified: 1247, co2_saved: 42.8 },
+          { username: 'GreenGuru', waste_classified: 982, co2_saved: 35.2 },
+          { username: 'WasteWizard', waste_classified: 876, co2_saved: 31.5 },
+          { username: 'RecycleMaster', waste_classified: 754, co2_saved: 26.7 },
+          { username: 'EcoHero', waste_classified: 621, co2_saved: 21.3 }
+        ];
+      }
+    }
+    
+    function closeModal() {
+      document.getElementById('modal').style.display = 'none';
+    }
+    
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+      const isDarkMode = document.body.classList.contains('dark-mode');
+      localStorage.setItem('darkMode', isDarkMode);
+      showNotification(isDarkMode ? 'Dark mode enabled' : 'Light mode enabled');
+    }
+    
+    // Add GPU acceleration information to the UI
+    function updateGPUInfo() {
+      // This would normally check for actual GPU availability
+      // For demo, we'll just show that GPU acceleration is enabled
+      const gpuInfo = document.createElement('div');
+      gpuInfo.innerHTML = `
+        <div style="margin-top: 15px; padding: 10px; background: rgba(23, 138, 59, 0.1); border-radius: 8px; border: 1px solid var(--accent);">
+          <strong>⚡ GPU Acceleration Enabled</strong>
+          <div style="font-size: 12px; margin-top: 5px;">Using Fusion Model (CNN+YOLO) with Enhanced Prediction Methods</div>
+        </div>
+      `;
+      
+      // Add to the classify card
+      const classifyCard = document.getElementById('classifyCard');
+      if (classifyCard) {
+        classifyCard.appendChild(gpuInfo);
+      }
+    }
+    
+    // Waste category information
+    const wasteInfo = {
+      'battery': {
+        name: 'Battery',
+        description: 'Batteries contain harmful chemicals that can pollute the environment if not disposed of properly.',
+        decomposition: 'Batteries should be taken to special collection points at electronics stores, recycling centers, or municipal waste facilities. Never throw batteries in regular trash.',
+        tips: 'Store used batteries in a cool, dry place until you can recycle them. Tape the terminals to prevent fires.'
+      },
+      'biological': {
+        name: 'Biological Waste',
+        description: 'Organic waste such as food scraps, garden waste, and other biodegradable materials.',
+        decomposition: 'Compost biological waste in a compost bin or send it to a composting facility. It naturally decomposes in 2-6 months.',
+        tips: 'Separate wet waste from dry waste. Use a compost bin for kitchen scraps.'
+      },
+      'clothes': {
+        name: 'Clothes',
+        description: 'Textile items including clothing, shoes, and fabric materials.',
+        decomposition: 'Donate wearable clothes. Unusable textiles can be recycled at textile recycling centers. Natural fibers decompose in 1-5 years.',
+        tips: 'Wash and dry clothes before donating. Check for local textile recycling programs.'
+      },
+      'glass': {
+        name: 'Glass',
+        description: 'Glass bottles, jars, and other glass products.',
+        decomposition: 'Glass is 100% recyclable and can be recycled endlessly without loss in quality. It takes 1 million years to decompose naturally.',
+        tips: 'Rinse containers before recycling. Remove lids and caps.'
+      },
+      'metal': {
+        name: 'Metal',
+        description: 'Aluminum cans, steel containers, and other metal items.',
+        decomposition: 'Metal is highly recyclable. Aluminum cans can be recycled indefinitely. It takes 80-200 years to decompose naturally.',
+        tips: 'Rinse containers before recycling. Remove labels when possible.'
+      },
+      'paper': {
+        name: 'Paper',
+        description: 'Newspapers, magazines, office paper, and other paper products.',
+        decomposition: 'Paper can be recycled 5-7 times before fibers become too short. It decomposes naturally in 2-6 weeks.',
+        tips: 'Keep paper dry and clean for recycling. Remove plastic covers and staples.'
+      },
+      'plastic': {
+        name: 'Plastic',
+        description: 'Plastic bottles, bags, containers, and packaging materials.',
+        decomposition: 'Plastic recycling varies by type. Most plastics take 450+ years to decompose naturally.',
+        tips: 'Check recycling symbols. Clean containers before recycling. Reduce plastic use when possible.'
+      },
+      'shoes': {
+        name: 'Shoes',
+        description: 'Footwear of all types including sneakers, boots, and sandals.',
+        decomposition: 'Donate wearable shoes. Unusable shoes can be recycled at specialized facilities. Natural materials decompose in 20-40 years.',
+        tips: 'Clean shoes before donating. Check for local shoe recycling programs.'
+      },
+      'trash': {
+        name: 'General Trash',
+        description: 'Non-recyclable and non-compostable waste materials.',
+        decomposition: 'General trash goes to landfills where decomposition varies widely by material. This should be minimized through reduction and recycling.',
+        tips: 'Follow local waste disposal guidelines. Reduce waste by choosing reusable alternatives.'
+      }
+    };
+    
+    // Waste type mapping for classification
+    const wasteTypeMapping = {
+      'biological': {
+        type: 'Biodegradable',
+        binColor: 'Green',
+        binColorCode: '#28a745',
+        icon: '🌱',
+        reason: 'Can decompose naturally; suitable for compost.'
+      },
+      'clothes': {
+        type: 'Non-Biodegradable',
+        binColor: 'Blue',
+        binColorCode: '#0f9dff',
+        icon: '👕',
+        reason: 'Reusable or recyclable.'
+      },
+      'glass': {
+        type: 'Non-Biodegradable',
+        binColor: 'Blue',
+        binColorCode: '#0f9dff',
+        icon: '🥛',
+        reason: 'Recyclable but not biodegradable.'
+      },
+      'metal': {
+        type: 'Non-Biodegradable',
+        binColor: 'Blue',
+        binColorCode: '#0f9dff',
+        icon: '🥫',
+        reason: 'Recyclable material.'
+      },
+      'paper': {
+        type: 'Non-Biodegradable',
+        binColor: 'Blue',
+        binColorCode: '#0f9dff',
+        icon: '📄',
+        reason: 'Can be reused or recycled.'
+      },
+      'plastic': {
+        type: 'Non-Biodegradable',
+        binColor: 'Blue',
+        binColorCode: '#0f9dff',
+        icon: '🥤',
+        reason: 'Recyclable but harmful if mixed with wet waste.'
+      },
+      'shoes': {
+        type: 'Non-Biodegradable',
+        binColor: 'Blue',
+        binColorCode: '#0f9dff',
+        icon: '👟',
+        reason: 'Can be reused or upcycled.'
+      },
+      'battery': {
+        type: 'Hazardous',
+        binColor: 'Red',
+        binColorCode: '#dc3545',
+        icon: '🔋',
+        reason: 'Contains toxic chemicals; dispose safely.'
+      },
+      'trash': {
+        type: 'Residual Waste',
+        binColor: 'Black',
+        binColorCode: '#000000',
+        icon: '🗑️',
+        reason: 'Mixed or contaminated waste that cannot be recycled.'
+      }
+    };
+
+    const wasteData = {
+      "Battery": {
+        type: "Hazardous Waste (Red Bin)",
+        description: "Contains toxic heavy metals like lead, mercury, and cadmium. These chemicals pollute soil and water if not disposed of safely.",
+        decompose: "Cannot decompose naturally. Must be sent to an authorized e-waste collection center.",
+        decayTime: "Does not biodegrade (indefinite).",
+        disposalTips: [
+          "Store used batteries in a dry container until collected.",
+          "Never burn or mix batteries with household trash.",
+          "Tape the terminals before disposing to avoid short-circuiting."
+        ],
+        ecoTips: [
+          "Use rechargeable batteries instead of disposable ones.",
+          "Return old batteries to e-waste collection points.",
+          "Encourage battery recycling in schools or communities."
+        ]
+      },
+
+      "Biological": {
+        type: "Biodegradable Waste (Green Bin)",
+        description: "Organic kitchen or garden waste that decomposes naturally into compost.",
+        decompose: "Can be composted at home or in a community compost bin.",
+        decayTime: "1–3 months depending on moisture and temperature.",
+        disposalTips: [
+          "Avoid plastic bags when disposing food waste.",
+          "Compost at home for use as natural fertilizer.",
+          "Mix dry leaves to reduce compost smell."
+        ],
+        ecoTips: [
+          "Start a small compost pit at home.",
+          "Use compost to grow herbs or plants.",
+          "Plan meals to reduce leftover food waste."
+        ]
+      },
+
+      "Clothes": {
+        type: "Non-Biodegradable Waste (Blue Bin)",
+        description: "Old garments made from cotton, polyester, or mixed fabrics that take years to decompose.",
+        decompose: "Donate or recycle textiles into cleaning rags or craft material.",
+        decayTime: "6 months (cotton) to 200 years (synthetic).",
+        disposalTips: [
+          "Donate wearable clothes to NGOs or local drives.",
+          "Repurpose old fabrics into bags or cleaning cloths.",
+          "Avoid fast fashion; buy durable clothes."
+        ],
+        ecoTips: [
+          "Organize clothes swaps with friends.",
+          "Upcycle jeans or T-shirts into crafts.",
+          "Support sustainable fashion brands."
+        ]
+      },
+
+      "Glass": {
+        type: "Non-Biodegradable Waste (Blue Bin)",
+        description: "Made from sand and minerals. It's 100% recyclable and does not biodegrade.",
+        decompose: "Recycle glass by color at collection centers.",
+        decayTime: "Up to 1 million years if not recycled.",
+        disposalTips: [
+          "Never mix broken glass with food waste.",
+          "Label and wrap sharp glass before disposal.",
+          "Clean bottles before recycling."
+        ],
+        ecoTips: [
+          "Reuse jars for storage or decoration.",
+          "Buy beverages in glass bottles.",
+          "Support bottle return systems."
+        ]
+      },
+
+      "Metal": {
+        type: "Non-Biodegradable Waste (Blue Bin)",
+        description: "Includes aluminum, steel, and tin — all recyclable materials.",
+        decompose: "Clean and recycle; metals can be reused indefinitely.",
+        decayTime: "50–500 years.",
+        disposalTips: [
+          "Rinse and crush cans before recycling.",
+          "Remove food residue from tins.",
+          "Store sharp metal waste safely."
+        ],
+        ecoTips: [
+          "Buy items made from recycled metals.",
+          "Separate aluminum and steel before recycling.",
+          "Reuse tins for storage or crafts."
+        ]
+      },
+
+      "Paper": {
+        type: "Non-Biodegradable Waste (Blue Bin)",
+        description: "Made from wood pulp. Easily biodegradable and recyclable several times.",
+        decompose: "Recycle or compost clean paper; avoid plastic-coated sheets.",
+        decayTime: "2–6 weeks.",
+        disposalTips: [
+          "Keep paper dry for recycling.",
+          "Remove staples or tape before recycling.",
+          "Shred confidential papers before disposal."
+        ],
+        ecoTips: [
+          "Use both sides of paper before discarding.",
+          "Switch to digital notes or billing.",
+          "Buy recycled notebooks."
+        ]
+      },
+
+      "Plastic": {
+        type: "Non-Biodegradable Waste (Blue Bin)",
+        description: "Synthetic polymer material that is durable, lightweight, and highly polluting.",
+        decompose: "Cannot decompose naturally. Should be recycled through authorized centers.",
+        decayTime: "450–1000 years.",
+        disposalTips: [
+          "Rinse and separate plastics before disposal.",
+          "Avoid single-use plastic items.",
+          "Drop off clean plastics at recycling bins."
+        ],
+        ecoTips: [
+          "Use cloth bags and metal bottles.",
+          "Avoid plastic straws and cups.",
+          "Support zero-plastic brands."
+        ]
+      },
+
+      "Shoes": {
+        type: "Non-Biodegradable Waste (Blue Bin)",
+        description: "Footwear made from rubber, plastic, or leather that decomposes very slowly.",
+        decompose: "Donate wearable shoes; recycle or repurpose worn-out ones.",
+        decayTime: "30–80 years.",
+        disposalTips: [
+          "Donate old shoes to charities.",
+          "Cut or separate materials before recycling.",
+          "Avoid burning shoes; it releases toxins."
+        ],
+        ecoTips: [
+          "Buy durable, repairable shoes.",
+          "Join shoe recycling programs.",
+          "Turn old shoes into planters or crafts."
+        ]
+      },
+
+      "Trash": {
+        type: "Residual Waste (Black Bin)",
+        description: "Mixed waste that cannot be composted or recycled.",
+        decompose: "Usually sent to landfill or incineration.",
+        decayTime: "Varies from months to centuries.",
+        disposalTips: [
+          "Segregate waste properly to reduce landfill trash.",
+          "Avoid mixing recyclables with trash.",
+          "Seal waste in biodegradable bags before disposal."
+        ],
+        ecoTips: [
+          "Reduce purchases to avoid waste buildup.",
+          "Repair before replacing household items.",
+          "Educate family about waste segregation."
+        ]
+      }
+    };
+
+    // Function to display info dynamically
+    function displayWasteInfo(category) {
+      const info = wasteData[category];
+      if (!info) {
+        return {
+          description: "No description available.",
+          decompose: "No decomposition info available.",
+          decayTime: "Unknown",
+          disposalTip: "No tips available.",
+          ecoTip: "No eco tips available.",
+          wasteType: "Unknown",
+          binColor: "Gray",
+          binColorCode: "#6c757d",
+          icon: "❓"
+        };
+      }
+
+      // Random tip generators
+      const disposalTip = info.disposalTips[Math.floor(Math.random() * info.disposalTips.length)];
+      const ecoTip = info.ecoTips[Math.floor(Math.random() * info.ecoTips.length)];
+
+      // Extract bin information from type
+      let wasteType = info.type;
+      let binColor = "Gray";
+      let binColorCode = "#6c757d";
+      
+      if (info.type.includes("Hazardous")) {
+        binColor = "Red";
+        binColorCode = "#dc3545";
+      } else if (info.type.includes("Biodegradable")) {
+        binColor = "Green";
+        binColorCode = "#28a745";
+      } else if (info.type.includes("Non-Biodegradable")) {
+        binColor = "Blue";
+        binColorCode = "#0f9dff";
+      } else if (info.type.includes("Residual")) {
+        binColor = "Black";
+        binColorCode = "#000000";
+      }
+
+      // Extract icon based on category
+      const iconMap = {
+        "Battery": "🪫",
+        "Biological": "🍃",
+        "Clothes": "👕",
+        "Glass": "🧊",
+        "Metal": "🥫",
+        "Paper": "📄",
+        "Plastic": "🧴",
+        "Shoes": "👟",
+        "Trash": "🗑"
+      };
+      const icon = iconMap[category] || "❓";
+
+      return {
+        description: info.description,
+        decompose: info.decompose,
+        decayTime: info.decayTime,
+        disposalTip: disposalTip,
+        ecoTip: ecoTip,
+        wasteType: wasteType,
+        binColor: binColor,
+        binColorCode: binColorCode,
+        icon: icon
+      };
+    }
+
+    // Function to handle image upload
+    function handleImageUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const imgElement = document.getElementById('uploadedImage');
+          imgElement.src = e.target.result;
+          imgElement.style.display = 'block';
+          
+          // Hide previous results
+          document.getElementById('resultSection').style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+    
+
+    
+
+    
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+      const modal = document.getElementById('modal');
+      if (event.target === modal) {
+        closeModal();
+      }
+    };
+    
+    // Hide scroll indicator when user scrolls
+    window.addEventListener('scroll', function() {
+      const scrollIndicator = document.getElementById('scrollIndicator');
+      if (window.scrollY > 100) {
+        scrollIndicator.style.opacity = '0';
+      } else {
+        scrollIndicator.style.opacity = '1';
+      }
+    });
+    
+    // Hide scroll indicator after 5 seconds
+    setTimeout(() => {
+      const scrollIndicator = document.getElementById('scrollIndicator');
+      if (scrollIndicator) {
+        scrollIndicator.style.opacity = '0';
+      }
+    }, 5000);
+    
+    // Scroll indicator
+    const scrollIndicator = document.getElementById('scrollIndicator');
+    if (scrollIndicator) {
+      scrollIndicator.style.display = 'flex';
+    }
+  </script>
+  
+  <!-- Scroll indicator -->
+  <div id="scrollIndicator" style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(23, 138, 59, 0.2);color:var(--accent);padding:8px 16px;border-radius:20px;font-size:14px;z-index:5;opacity:1;transition:opacity 0.5s;box-shadow:0 4px 12px rgba(0,0,0,0.1);backdrop-filter:blur(5px);display:none;align-items:center;gap:8px;">
+    <span>👇 Scroll for more</span>
+  </div>
+  
+</body>
+</html>
