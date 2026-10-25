@@ -1,83 +1,98 @@
-# EcoWaste Classifier - AI Waste Classification System
+# EcoWaste Classifier: AI Waste Classification System
 
-This system uses trained CNN models to classify waste images into 9 categories and provides information on how to properly dispose of each type of waste. The project includes both a Flask backend API server and a web-based frontend interface.
+![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)
+
+A computer vision system that classifies waste images into 9 categories using PyTorch CNNs and tells you how to dispose of each type. It includes a Flask backend API and a web frontend.
+
+**Best result:** 91.79% validation accuracy (190/207 images) with EfficientNet-B0, the best of 4 architectures tested.
 
 ## Features
 
-- Classifies waste images using trained PyTorch CNN models
-- Provides detailed information about each waste category
-- Shows decomposition/recycling instructions
-- Offers eco-friendly disposal tips
-- Supports 9 waste categories:
-  - Battery
-  - Biological
-  - Clothes
-  - Glass
-  - Metal
-  - Paper
-  - Plastic
-  - Shoes
-  - Trash
-- Ensemble prediction logic with per-class confidence thresholds
-- Cardboard category explicitly excluded (not in dataset)
+- Classifies waste images with trained PyTorch CNN models
+- Single-model or ensemble prediction (confidence-weighted majority voting)
+- Per-class confidence thresholds that reject low-confidence predictions
+- Category details, decomposition/recycling instructions, and eco-friendly disposal tips
+- REST API plus a web interface
 
-## Model Performance
+## Waste categories and dataset
 
-Four CNN architectures were trained and evaluated on the 9-category waste dataset (1,945 images). Best result: 91.79% validation accuracy (190/207, EfficientNet-B0, best of 4 models tested — see runs/classifiers/efficientnet_b0_best.pth). Empirical validation accuracy extracted directly from saved PyTorch checkpoints:
+1,945 images across 9 categories:
 
-| Model          | Val. Accuracy | Epoch | Val. Loss | Checkpoint File |
-|----------------|---------------|-------|-----------|-----------------|
-| EfficientNet-B0 | 91.79%       | 6     | 0.2594    | `efficientnet_b0_best.pth` |
-| MobileNetV2     | 89.37%       | 9     | 0.4231    | `mobilenet_v2_best.pth` |
-| DenseNet121     | 86.23%       | 9     | 0.3995    | `densenet121_best.pth` |
-| ResNet50        | 82.37%       | 9     | 0.5171    | `resnet50_best.pth` |
+| Category | Images |
+|---|---|
+| Battery | 228 |
+| Biological | 232 |
+| Clothes | 225 |
+| Glass | 215 |
+| Metal | 212 |
+| Paper | 221 |
+| Plastic | 187 |
+| Shoes | 221 |
+| Trash | 204 |
 
-EfficientNet-B0 serves as the primary inference model based on its superior accuracy-to-size tradeoff. Multi-model predictions use confidence-weighted majority voting alongside per-class thresholding for low-confidence rejection.
+Cardboard is deliberately excluded because it is not in the dataset.
 
-## Setup Instructions
+## Model performance
 
-1. **Install Dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
+Four CNN architectures were trained on the 9-category dataset. Accuracy below is validation accuracy read directly from the saved best-epoch PyTorch checkpoints.
 
-2. **Configure Environment Variables**
-   Copy `.env.example` to `.env` and set `SECRET_KEY` for production deployments:
-   ```bash
-   cp .env.example .env
-   ```
+| Model | Val. accuracy | Epoch | Val. loss | Checkpoint |
+|---|---|---|---|---|
+| **EfficientNet-B0** | **91.79%** | 6 | 0.2594 | `efficientnet_b0_best.pth` |
+| MobileNetV2 | 89.37% | 9 | 0.4231 | `mobilenet_v2_best.pth` |
+| DenseNet121 | 86.23% | 9 | 0.3995 | `densenet121_best.pth` |
+| ResNet50 | 82.37% | 9 | 0.5171 | `resnet50_best.pth` |
 
-3. **Start the Server**
-   ```bash
-   python src/gamified_api_server.py
-   ```
-   The server will start on http://localhost:5000
+EfficientNet-B0 is the primary inference model for its accuracy-to-size tradeoff. Checkpoints are in `runs/classifiers/`.
 
-4. **Access the Application**
-   Open your browser and navigate to http://localhost:5000
+## How prediction works
 
-## Dataset Information
+1. The image is classified by EfficientNet-B0 (single mode) or by several models (ensemble mode).
+2. In ensemble mode, predictions are combined by confidence-weighted majority voting.
+3. Per-class confidence thresholds reject low-confidence results instead of forcing a label.
+4. The predicted category is returned with its disposal guidance.
 
-The models were trained on a dataset containing 1,945 waste images across 9 categories:
-- Battery: 228 images
-- Biological: 232 images
-- Clothes: 225 images
-- Glass: 215 images
-- Metal: 212 images
-- Paper: 221 images
-- Plastics: 187 images
-- Shoes: 221 images
-- Trash: 204 images
+## Setup
 
-## API Endpoints
+**1. Install dependencies**
 
-The Flask backend provides the following API endpoints:
+```bash
+pip install -r requirements.txt
+```
 
-- `POST /predict` - Classify a waste image using single or ensemble prediction
-- `GET /models` - Get available model statuses
-- `GET /classes` - Get waste class descriptions and recycling guidance
-- `GET /health` - API server health status
+**2. Configure environment variables.** Copy `.env.example` to `.env` and set `SECRET_KEY` for production deployments.
+
+```bash
+cp .env.example .env
+```
+
+**3. Start the server**
+
+```bash
+python src/gamified_api_server.py
+```
+
+**4. Open the app** at http://localhost:5000.
+
+## API endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/predict` | Classify a waste image (single or ensemble prediction) |
+| `GET` | `/models` | Status of available models |
+| `GET` | `/classes` | Waste class descriptions and recycling guidance |
+| `GET` | `/health` | API server health |
+
+## Limitations
+
+- Reported accuracy is validation accuracy on 207 images. No separate held-out test result is reported, so treat 91.79% as an upper-bound estimate of real-world performance.
+- The dataset is small (1,945 images) and limited to 9 categories; items outside them (for example cardboard) are not supported.
+- Class sizes are roughly balanced (187 to 232 images each), but per-class metrics are not yet reported.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT. See the [LICENSE](LICENSE) file.
